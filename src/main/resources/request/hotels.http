@@ -1,0 +1,32 @@
+GET {{url}}/hotels
+
+###
+
+GET {{url}}/hotels/1
+Authorization: Bearer {{token}}
+
+###
+
+POST {{url}}/hotels
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "hotelName": "Hotel 1",
+    "town": "Town 1",
+    "hotelCategory": "LUXURY",
+    "hotelType": "FIVE_STAR"
+}
+
+###
+
+PUT {{url}}/hotels/1003
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "hotelName": "UPDATED Hotel 1",
+    "town": "Town 1",
+    "hotelCategory": "LUXURY",
+    "hotelType": "FIVE_STAR"
+}

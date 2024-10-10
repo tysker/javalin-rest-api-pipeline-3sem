@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dk.lyngby</groupId>
+    <artifactId>javalin-rest-api-pipeline-3sem</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <javalin.version>6.3.0</javalin.version>
+        <jackson.version>2.17.2</jackson.version>
+        <lombok.version>1.18.34</lombok.version>
+        <logback.version>1.5.8</logback.version>
+        <slf4j.version>2.0.16</slf4j.version>
+        <hibernate-version>6.5.2.Final</hibernate-version>
+        <postgresql.version>42.7.3</postgresql.version>
+        <testcontainers.version>1.19.5</testcontainers.version>
+        <restassured.version>5.5.0</restassured.version>
+        <hamcrest.version>2.2</hamcrest.version>
+        <junit.version>5.9.1</junit.version>
+    </properties>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.23.0</version>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://www.jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+
+        <!--  SECURITY      -->
+        <dependency>
+            <groupId>com.github.tysker</groupId>
+            <artifactId>token-dependency-3sem</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>9.40</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+        <!--  DB    -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate-version}</version>
+        </dependency>
+
+        <!--  WEB SERVICE   -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>${javalin.version}</version>
+        </dependency>
+
+        <!--  Utilities      -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--  Logging   -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!--  TEST CONTAINERS    -->
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>${testcontainers.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--  JUNIT    -->
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--  HAMCREST    -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${hamcrest.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--  REST ASSURED    -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${restassured.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${restassured.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+
+        <finalName>app</finalName> <!-- This is the name of the jar file -->
+
+        <pluginManagement>
+            <!--
+            Those two plugins below are plugins for another plugin used in the project.
+            They created conflicts for the shade plugin, so I changed the plugin version to another
+            version that didn't conflict with the shade plugin
+             -->
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.25.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>3.4.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!--  Pom.xml properties plugin  -->
+
+            <plugin>
+                <!--  https://www.baeldung.com/java-accessing-maven-properties  -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>write-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <outputFile>${project.build.outputDirectory}/properties-from-pom.properties</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--   Surefire plugin (Testing)  -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+
+            <!--   Shade plugin (JAR)  -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <transformers>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>
+                                dk/lyngby/Main <!-- Here you should put the main class of your application -->
+                            </mainClass>
+                        </transformer>
+                    </transformers>
+                    <filters>
+                        <filter> <!-- This filter is needed to avoid a bug in the shade plugin -->
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>module-info.class</exclude>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                                <exclude>META-INF/LICENSE.txt</exclude>
+                                <exclude>META-INF/LICENSE.md</exclude>
+                                <exclude>META-INF/LICENSE</exclude>
+                                <exclude>META-INF/NOTICE.md</exclude>
+                                <exclude>META-INF/NOTICE.txt</exclude>
+                                <exclude>META-INF/NOTICE</exclude>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
+                                <exclude>META-INF/services/java.sql.Driver</exclude>
+                                <exclude>META-INF/versions/9/module-info.class</exclude>
+                                <exclude>META-INF/services/org.eclipse.jetty.webapp.Configuration</exclude>
+                                <exclude>META-INF/services/jakarta.servlet.ServletContainerInitializer</exclude>
+                                <exclude>META-INF/maven/com.google.code.gson/gson/pom.properties</exclude>
+                                <exclude>META-INF/maven/com.google.code.gson/gson/pom.xml</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
