@@ -12,32 +12,39 @@ import dk.lyngby.util.ApiProps;
 import dk.token.TokenFactory;
 import dk.token.exceptions.TokenException;
 import io.javalin.http.Context;
+import io.javalin.http.Handler;
 import io.javalin.security.RouteRole;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class AccessManager {
 
-    public void checkRoleAccess(Context ctx) throws Exception {
+    public void accessManagerHandler(Handler handler, Context ctx, Set<? extends RouteRole> permittedRoles) throws Exception {
+        System.out.println(permittedRoles);
+        String path = ctx.path();
+        boolean isAuthorized = false;
 
-        if (!ctx.routeRoles().contains(Role.RoleName.ANYONE)) {
-            boolean isAuthorized = false;
-
-            Role.RoleName[] userRoles = getUserRoles(ctx);
-
-            for (RouteRole role : userRoles) {
-                if (ctx.routeRoles().contains(role)) {
+        if (path.equals("/api/v1/routes") || permittedRoles.contains(Role.RoleName.ANYONE) || Objects.equals(ctx.method().toString(), "OPTIONS")) {
+            handler.handle(ctx);
+            return;
+        } else {
+            RouteRole[] roles = getUserRoles(ctx);
+            for (RouteRole role : roles) {
+                if (permittedRoles.contains(role)) {
                     isAuthorized = true;
                     break;
                 }
             }
+        }
 
-            if (!isAuthorized) {
-                throw new AuthorizationException(401, "You are not authorized to perform this action");
-            }
+        if (isAuthorized) {
+            handler.handle(ctx);
+        } else {
+            throw new AuthorizationException(401, "You are not authorized to perform this action");
         }
     }
 

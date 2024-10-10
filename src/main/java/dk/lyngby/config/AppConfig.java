@@ -1,20 +1,15 @@
 package dk.lyngby.config;
 
 import dk.lyngby.security.AccessManager;
-import dk.lyngby.security.controller.ExceptionCtrl;
-import dk.lyngby.exception.ApiException;
-import dk.lyngby.exception.AuthorizationException;
 import dk.lyngby.security.model.User;
 import dk.lyngby.routes.Routes;
 import dk.lyngby.util.ApiProps;
-import dk.token.exceptions.TokenException;
 import dk.token.model.ClaimBuilder;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.Context;
-import io.javalin.validation.ValidationException;
+import io.javalin.plugin.bundled.RouteOverviewPlugin;
 import lombok.NoArgsConstructor;
-import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,31 +23,20 @@ public class AppConfig {
 
     private static final Logger log = LoggerFactory.getLogger(AppConfig.class);
     private static final AccessManager amc = new AccessManager();
-    private static final ExceptionCtrl EXCEPTION_CTRL = new ExceptionCtrl();
     private static final Routes routes = new Routes();
     private static Javalin app;
 
     private static void configuration(JavalinConfig config) {
         // == server ==
-        config.router.contextPath = ApiProps.API_CONTEXT; // base path for all routes
+        config.routing.contextPath = "/api/v1";// base path for all routes
         config.http.defaultContentType = "application/json"; // default content type for requests
 
         // == plugin ==
-        config.bundledPlugins.enableRouteOverview("/routes"); // enables route overview at /routes
-        config.bundledPlugins.enableDevLogging(); // enables development logging
+        config.plugins.register(new RouteOverviewPlugin("/routes")); // enables route overview at /routes
+        config.plugins.enableDevLogging(); // enables development logging
 
         // == routes ==
-        config.router.apiBuilder(routes.getApiRoutes());
-    }
-
-    // == exceptions ==
-    private static void exceptionContext(Javalin app){
-        app.exception(ApiException.class, EXCEPTION_CTRL::apiExceptionHandler);
-        app.exception(ValidationException.class, EXCEPTION_CTRL::validationExceptionHandler);
-        app.exception(AuthorizationException.class, EXCEPTION_CTRL::exceptionHandlerNotAuthorized);
-        app.exception(TokenException.class, EXCEPTION_CTRL::tokenExceptionHandler);
-        app.exception(ConstraintViolationException.class, EXCEPTION_CTRL::constraintViolationExceptionHandler);
-        app.exception(Exception.class, EXCEPTION_CTRL::exceptionHandler);
+        config.accessManager(amc::accessManagerHandler);
     }
 
     // == security ==
@@ -86,10 +70,10 @@ public class AppConfig {
 
     public static void startServer(int port) {
         app = Javalin.create(AppConfig::configuration);
-        app.beforeMatched(amc::checkRoleAccess);
+        app.updateConfig(AppConfig::configuration);
         app.before(AppConfig::corsHeaders);
         app.options("/*", AppConfig::corsHeaders);
-        exceptionContext(app);
+        app.routes(routes.getApiRoutes(app));
         app.start(port);
         log.info("Server started on port: {}", port);
     }
