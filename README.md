@@ -1,9 +1,12 @@
-# JAVALIN R.E.S.T API
+# Javalin R.E.S.T Api Development Pipeline
 
 ### Description
 
 This is a simple REST API written in Java that allows you to create, read, update and delete users. 
 The API is secured with JWT tokens and uses a PostgresSQL database for storing user data.
+
+This project is also used for testing the CI/CD pipeline with Github Actions. (See the .github/workflows folder)
+We use Github Actions to build the project, run the tests and push the Docker image to Docker Hub.
 
 ### Technologies used:
 
@@ -19,6 +22,10 @@ The API is secured with JWT tokens and uses a PostgresSQL database for storing u
 - Log4j (Logging Framework)
 - Testcontainers (Integration Testing)
 - Rest Assured (API Testing)
+- Træfik (Reverse Proxy, Load Balancer, Deployment)
+- DigitalOcean (Cloud Provider)
+- Github Actions (CI/CD)
+- Caddy (Web Server)
 
 ### Prerequisites
 
