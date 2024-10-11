@@ -1,3 +1,0 @@
-hotel.<your_domain_name>.dk {
-    reverse_proxy hotelAPI:7070
-}
