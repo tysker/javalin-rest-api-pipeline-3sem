@@ -24,10 +24,10 @@ services:
 
       # Certificates configuration
       - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_DNSCHALLENGE=true
-      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_DNSCHALLENGE_PROVIDER=digitalocean
+      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_DNSCHALLENGE_PROVIDER={DNS_CHALLENGE_PROVIDER} # sets the DNS provider for the ACME challenge
       - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_DNSCHALLENGE_DELAYBEFORECHECK=0 # Sets the time to wait before checking the DNS c>
-      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_EMAIL=joergoertel@proton.me # Email address used for registration
-      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_STORAGE=/etc/traefik/acme/acme.json # Stores the Let's Encrypt certificate in the docker volume
+      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_EMAIL=${EMAIL} # sets the email for the ACME provider
+      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_STORAGE=${ACME_STORAGE} # Stores the Let's Encrypt certificate in the docker volume
 
       # Digital Ocean configuration
       - DO_AUTH_TOKEN=${DOCKER_TOKEN} # Digital Ocean API Token
