@@ -28,7 +28,7 @@ public class AppConfig {
 
     private static final Logger log = LoggerFactory.getLogger(AppConfig.class);
     private static final AccessManager amc = new AccessManager();
-    private static final ExceptionCtrl EXCEPTION_CTRL = new ExceptionCtrl();
+    private static final ExceptionCtrl exctrl = new ExceptionCtrl();
     private static final Routes routes = new Routes();
     private static Javalin app;
 
@@ -47,12 +47,12 @@ public class AppConfig {
 
     // == exceptions ==
     private static void exceptionContext(Javalin app){
-        app.exception(ApiException.class, EXCEPTION_CTRL::apiExceptionHandler);
-        app.exception(ValidationException.class, EXCEPTION_CTRL::validationExceptionHandler);
-        app.exception(AuthorizationException.class, EXCEPTION_CTRL::exceptionHandlerNotAuthorized);
-        app.exception(TokenException.class, EXCEPTION_CTRL::tokenExceptionHandler);
-        app.exception(ConstraintViolationException.class, EXCEPTION_CTRL::constraintViolationExceptionHandler);
-        app.exception(Exception.class, EXCEPTION_CTRL::exceptionHandler);
+        app.exception(ApiException.class, exctrl::apiExceptionHandler);
+        app.exception(ValidationException.class, exctrl::validationExceptionHandler);
+        app.exception(AuthorizationException.class, exctrl::exceptionHandlerNotAuthorized);
+        app.exception(TokenException.class, exctrl::tokenExceptionHandler);
+        app.exception(ConstraintViolationException.class, exctrl::constraintViolationExceptionHandler);
+        app.exception(Exception.class, exctrl::exceptionHandler);
     }
 
     // == security ==
