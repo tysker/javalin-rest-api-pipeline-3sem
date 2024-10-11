@@ -1,0 +1,1 @@
+//Acme json file contains all certificates and keys for the domains. It is used by the acme client to renew the certificates.

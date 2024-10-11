@@ -1,0 +1,87 @@
+# Define entrypoints
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+# Define routers
+http:
+  routers:
+    # HTTP Router for Traefik Dashboard (Redirect HTTP to HTTPS)
+    traefik:
+      rule: "Host(`${TRAEFIK_DOMAIN}`)"
+      entryPoints:
+        - web
+      middlewares:
+        - test-redirectscheme
+
+    # HTTPS Router for Traefik Dashboard
+    traefik-secure:
+      rule: "Host(`${TRAEFIK_DOMAIN}`)" # Ensure this has the correct domain name or rule
+      entryPoints:
+        - websecure
+      service: api@internal
+      tls:
+        certResolver: myresolver
+      middlewares:
+        - auth
+
+    # HTTP Router for the Rest API (Redirect HTTP to HTTPS)
+    restapi:
+      rule: "Host(`${REST_API_DOMAIN}`)"
+      entryPoints:
+        - web
+      middlewares:
+        - restapi-redirectscheme
+
+    # HTTPS Router for the Rest API
+    restapi-secure:
+      rule: "Host(`${REST_API_DOMAIN}`)"
+      entryPoints:
+        - websecure
+      service: restapi-service
+      tls:
+        certResolver: myresolver
+      middlewares:
+        - restapi-compress
+        - restapi-ratelimit
+
+  # Define services
+  services:
+    restapi-service:
+      loadBalancer:
+        servers:
+          - url: "http://restapi:7070"
+
+# Define middlewares
+http:
+  middlewares:
+    # Middleware for basic authentication
+    auth:
+      basicAuth:
+        users:
+          - "${TRAEFIK_DASHBOARD_AUTHENTICATION}"
+        realm: "Restricted Area"
+
+    # Middleware to redirect HTTP to HTTPS
+    test-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    restapi-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    # Middleware for GZIP compression
+    restapi-compress:
+      compress: true
+
+    # Middleware for rate limiting
+    restapi-ratelimit:
+      rateLimit:
+        average: 100
+        period: 1m
+        burst: 50

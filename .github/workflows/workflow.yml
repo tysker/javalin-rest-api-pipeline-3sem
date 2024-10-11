@@ -1,4 +1,4 @@
-name: JAVALIN REST API CADDY PIPELINE
+name: JAVALIN REST API TRAEFIK PIPELINE
 on:
   push:
     branches: [ caddy-pipeline ]
