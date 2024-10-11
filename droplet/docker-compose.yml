@@ -4,8 +4,7 @@ services:
     image: traefik:3.0.0-beta5
     container_name: traefik
     environment:
-
-      # Traefik API
+    # Traefik API
       - TRAEFIK_API=true # enables the Traefik API. True by default
       - TRAEFIK_API_INSECURE=false # disables access to the Traefik API over an insecure connection (HTTP).
       - TRAEFIK_API_DASHBOARD=true # enables the Traefik dashboard. True by default
@@ -31,7 +30,7 @@ services:
       - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_STORAGE=/etc/traefik/acme/acme.json # Stores the Let's Encrypt certificate in the docker volume
 
       # Digital Ocean configuration
-      - DO_AUTH_TOKEN=dop_v1_32369f8127d690259bdb965f9b65d539cf768bf7cfd97ba40d3c38dd52edbc51 # Digital Ocean API Token
+      - DO_AUTH_TOKEN=${DOCKER_TOKEN} # Digital Ocean API Token
     ports: # Expose ports 80 and 443
       - "80:80"
       - "443:443"
@@ -42,18 +41,17 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./acme:/etc/traefik/acme # Copies the Let's Encrypt certificate locally for ease of backing up
     labels:
-
       # Traefik configuration
       traefik.enable: true # enables Traefik for this container
 
       # Routers configuration
       # RedirectScheme http Router traefik
-      traefik.http.routers.traefik.rule: Host(`traefik.joergoertel.dk`)
+      traefik.http.routers.traefik.rule: Host(`${TREAFIK_DOMAIN}`)
       traefik.http.routers.traefik.entrypoints: web
       traefik.http.routers.traefik.middlewares: test-redirectscheme # applies the test-redirectscheme middleware to the traefik route
 
       # Https Router traefik-secure
-      traefik.http.routers.traefik-secure.rule: Host(`traefik.joergoertel.dk`) # sets the rule for the Traefik dashboard route
+      traefik.http.routers.traefik-secure.rule: Host(``) # sets the rule for the Traefik dashboard route
       traefik.http.routers.traefik-secure.entrypoints: websecure # sets the entrypoint for the Traefik dashboard route
       traefik.http.routers.traefik-secure.tls: true # enables TLS for the Traefik dashboard route
       traefik.http.routers.traefik-secure.tls.certresolver: myresolver # sets the certificate resolver for the Traefik dashboard route
@@ -64,7 +62,7 @@ services:
       traefik.http.services.traefik-secure.loadbalancer.server.port: 8080 # sets the port for the Traefik dashboard route
 
       # Middleware configuration (echo $(htpasswd -nb admin admin123))
-      traefik.http.middlewares.auth.basicauth.users: admin:$$apr1$$wsj2Bgjy$$EjMj7QJ4vShpThbSJHz0n1 # sets the user and password for the basic authentication process
+      traefik.http.middlewares.auth.basicauth.users: ${TREAFIK_DASHBOARD_AUTHENTICATION} # sets the user and password for the basic authentication process
       traefik.http.middlewares.auth.basicauth.realm: Restricted Area # sets the authentication realm for the basic authentication pr>
 
       # Redirect Scheme HTTP -> HTTPS
@@ -75,20 +73,24 @@ services:
       com.centurylinklabs.watchtower.enable: "false" # disables Watchtower for this container
 
   restapi:
-    image: tyskerdocker/javalin-auth-api:v6
+    image: ${DOCKER_USERNAME}/${DOCKER_REPOSITORY}:${DOCKER_TAG}
     container_name: restapi
     restart: unless-stopped
     networks:
       - frontend
       - backend
     environment:
-      CONNECTION_STR: jdbc:postgresql://db:5432/
-      DB_USERNAME: dev
-      DB_PASSWORD: ax2
-      DEPLOYED: TRUE
-      SECRET_KEY: 841D8A6C80CBA4FCAD32D5367C18C53B
-      TOKEN_EXPIRE_TIME: 1800000
-      ISSUER: cphbusiness.dk
+      PRODUCTION: ${PRODUCTION}
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
+      TOKEN_EXPIRATION_TIME: ${TOKEN_EXPIRATION_TIME}
+      TOKEN_ISSUER: ${TOKEN_ISSUER}
+      TOKEN_AUDIENCE: ${TOKEN_AUDIENCE}
+      DOCKER_USERNAME: ${DOCKER_USERNAME}
+      DOCKER_REPOSITORY: ${DOCKER_REPOSITORY}
+      DOCKER_TAG: ${DOCKER_TAG}
     labels:
 
       # Traefik configuration
@@ -96,12 +98,12 @@ services:
 
       # Routers configuration
       # RedirectScheme http Router api
-      traefik.http.routers.restapi.rule: Host(`api.joergoertel.dk`)
+      traefik.http.routers.restapi.rule: Host(`${REST_API_DOMAIN}`)
       traefik.http.routers.restapi.entrypoints: web
       traefik.http.routers.restapi.middlewares: restapi-redirectscheme # applies the api-redirectscheme middleware to the api route
 
       # Https Router api-secure
-      traefik.http.routers.restapi-secure.rule: Host(`api.joergoertel.dk`)
+      traefik.http.routers.restapi-secure.rule: Host(``)
       traefik.http.routers.restapi-secure.entrypoints: websecure
       traefik.http.routers.restapi-secure.tls.certresolver: myresolver # see below
       traefik.http.routers.restapi-secure.middlewares: restapi-compress, restapi-ratelimit # applies the api-compress and api-ratelimit middlewares to the api route
@@ -135,7 +137,8 @@ services:
     networks:
       - backend
     environment:
-      POSTGRES_PASSWORD: veryuniquepassword
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_USER: ${DATABASE_USERNAME}
     labels:
       # Watchtower configuration
       com.centurylinklabs.watchtower.enable: "false" # disables Watchtower for this container
@@ -145,44 +148,12 @@ services:
     ports:
       - "3434:5432"
 
-  schoolhacks:
-    image: tyskerdocker/schoolhacks-app:latest
-    container_name: schoolhacks
-    restart: unless-stopped
-    networks:
-      - frontend
-    labels:
-
-      # Traefik configuration
-      traefik.enable: true # enables Traefik for this container
-
-      # Routers configuration
-      # RedirectScheme http Router api
-      traefik.http.routers.schoolhacks.rule: Host(`schoolhacks.joergoertel.dk`)
-      traefik.http.routers.schoolhacks.entrypoints: web
-      traefik.http.routers.schoolhacks.middlewares: schoolhacks-redirectscheme # applies the api-redirectscheme middleware to the api route
-
-      # Https Router api-secure
-      traefik.http.routers.schoolhacks-secure.rule: Host(`schoolhacks.joergoertel.dk`)
-      traefik.http.routers.schoolhacks-secure.entrypoints: websecure
-      traefik.http.routers.schoolhacks-secure.tls.certresolver: myresolver # see below
-
-      # Services configuration
-      traefik.http.services.schoolhacks-secure.loadbalancer.server.port: 80 # sets the port for the api service
-
-      # Redirect Scheme HTTP -> HTTPS
-      traefik.http.middlewares.schoolhacks-redirectscheme.redirectscheme.scheme: https # sets the scheme to redirect to (https)
-      traefik.http.middlewares.schoolhacks-redirectscheme.redirectscheme.permanent: true
-
-      # Watchtower configuration
-      com.centurylinklabs.watchtower.enable: "true" # enables Watchtower for this container
-
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
     environment:
-      REPO_USER: tyskerdocker
-      REPO_PASS: dckr_pat_saqUuV7ya0g_E-FRU4GPQfzSXLs
+      REPO_USER: ${DOCKER_USERNAME}
+      REPO_PASS: ${DOCKER_TOKEN}
     labels:
       com.centurylinklabs.watchtower.enable: "false"
     volumes:
