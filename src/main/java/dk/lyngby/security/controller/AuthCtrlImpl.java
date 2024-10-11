@@ -36,7 +36,7 @@ public class AuthCtrlImpl implements AuthCtrl {
 
         // == create token ==
         ClaimBuilder claimBuilder = AppConfig.getClaimBuilder(user, roleList.toString());
-        String token = TokenFactory.createToken(claimBuilder, ApiProps.SECRET_KEY);
+        String token = TokenFactory.createToken(claimBuilder, ApiProps.TOKEN_SECRET_KEY);
 
         ctx.status(200);
         ctx.json(createResponseObject(user.getUsername(), roleList, token));
@@ -56,7 +56,7 @@ public class AuthCtrlImpl implements AuthCtrl {
         List<Role.RoleName> roleList = registerDto.roleList().stream().map(Role.RoleName::valueOf).toList().stream().toList();
         // == create token ==
         ClaimBuilder claimBuilder = AppConfig.getClaimBuilder(new User(registerDto.username(), registerDto.password()), roleList.toString());
-        String token = TokenFactory.createToken(claimBuilder, ApiProps.SECRET_KEY);
+        String token = TokenFactory.createToken(claimBuilder, ApiProps.TOKEN_SECRET_KEY);
 
         ctx.status(201);
         ctx.cookie("token", token);

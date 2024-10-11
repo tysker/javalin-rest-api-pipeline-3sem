@@ -1,9 +1,9 @@
-name: JAVALIN REST API PIPELINE
+name: JAVALIN REST API CADDY PIPELINE
 on:
   push:
-    branches: [ main ]
+    branches: [ caddy-pipeline ]
   pull_request:
-    branches: [ main ]
+    branches: [ caddy-pipeline ]
 jobs:
   build:
     runs-on: ubuntu-latest

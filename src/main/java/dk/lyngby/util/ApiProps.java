@@ -2,6 +2,8 @@ package dk.lyngby.util;
 
 public class ApiProps {
 
+    private static final boolean PRODUCTION = Boolean.parseBoolean(System.getenv("PRODUCTION"));
+
     // == HIBERNATE CONFIG FILE ==
     public static final String DB_NAME = "hotel";
     public static final String DATABASE_USERNAME = "postgres";
@@ -21,10 +23,10 @@ public class ApiProps {
     public static final String Hotel_GROUP = "/hotels";
 
     // == API SECURITY ==
-    public static final String TOKEN_ISSUER = "issuer";
-    public static final String TOKEN_AUDIENCE = "audience";
-    public static final long TOKEN_EXPIRATION_TIME = 3600000;
-    public static final String SECRET_KEY = "841D8A6C80CBA4FCAD32D5367C18C53B";
+    public static final String TOKEN_ISSUER = PRODUCTION ? System.getenv("TOKEN_ISSUER") : "development";
+    public static final String TOKEN_AUDIENCE = PRODUCTION ? System.getenv("TOKEN_AUDIENCE") : "development";
+    public static final long TOKEN_EXPIRATION_TIME = PRODUCTION ? Long.parseLong(System.getenv("TOKEN_EXPIRATION_TIME")) : 3600000;
+    public static final String TOKEN_SECRET_KEY = PRODUCTION ? System.getenv("TOKEN_SECRET_KEY") : "some_secret_key646387kjhgkfjhdt";
 
     // == API COOKIES ==
     public static final int COOKIE_MAX_AGE = 3600;

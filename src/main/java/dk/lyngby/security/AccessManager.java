@@ -59,7 +59,7 @@ public class AccessManager {
 
             String roles = user.getRoleList().stream().map(role -> role.getRoleName().toString()).collect(Collectors.joining(", ", "[", "]"));
 
-            String claim = TokenFactory.verifyToken(token, ApiProps.SECRET_KEY, AppConfig.getClaimBuilder(user, roles));
+            String claim = TokenFactory.verifyToken(token, ApiProps.TOKEN_SECRET_KEY, AppConfig.getClaimBuilder(user, roles));
             return gson.fromJson(claim, TokenDto.class).roles();
         } catch (Exception e) {
             throw new TokenException("Token is not valid", e);
