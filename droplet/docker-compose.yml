@@ -33,9 +33,6 @@ services:
       TOKEN_EXPIRATION_TIME: ${TOKEN_EXPIRATION_TIME}
       TOKEN_ISSUER: ${TOKEN_ISSUER}
       TOKEN_AUDIENCE: ${TOKEN_AUDIENCE}
-      DOCKER_USERNAME: ${DOCKER_USERNAME}
-      DOCKER_REPOSITORY: ${DOCKER_REPOSITORY}
-      DOCKER_TAG: ${DOCKER_TAG}
     labels:
       traefik.enable: true
 
@@ -46,8 +43,7 @@ services:
     networks:
       - backend
     environment:
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     labels:
       # Watchtower configuration
       com.centurylinklabs.watchtower.enable: "false" # disables Watchtower for this container

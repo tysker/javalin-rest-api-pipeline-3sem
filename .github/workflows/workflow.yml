@@ -1,9 +1,9 @@
 name: JAVALIN REST API TRAEFIK PIPELINE
 on:
   push:
-    branches: [ caddy-pipeline ]
+    branches: [ traefik-pipeline ]
   pull_request:
-    branches: [ caddy-pipeline ]
+    branches: [ traefik-pipeline ]
 jobs:
   build:
     runs-on: ubuntu-latest

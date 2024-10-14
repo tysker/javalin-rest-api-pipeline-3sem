@@ -1,0 +1,164 @@
+version: '3.9'
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    environment:
+
+      # Traefik API
+      - TRAEFIK_API=true # enables the Traefik API. True by default
+      - TRAEFIK_API_INSECURE=false # disables access to the Traefik API over an insecure connection (HTTP).
+      - TRAEFIK_API_DASHBOARD=true # enables the Traefik dashboard. True by default
+
+      # Logging configuration
+      - TRAEFIK_LOG_LEVEL=INFO # sets the log level (DEBUG, INFO, WARN, ERROR, FATAL, PANIC). DEBUG by default
+      # - TRAEFIK_ACCESSLOG_FILTERS_STATUSCODES=400-499,500-599 # filters access logs to only include 400 and 500 level errors
+
+      # Provider configuration
+      - TRAEFIK_PROVIDERS_DOCKER=true # enables the Docker provider
+      - TRAEFIK_PROVIDERS_DOCKER_WATCH=true # tells Traefik to listen to Docker events
+      - TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT=false # prevents Traefik from creating routes for containers that don't have a traefik.enable=true label
+
+      # Entrypoints configuration
+      - TRAEFIK_ENTRYPOINTS_WEB_ADDRESS=:80 # sets the port for HTTP
+      - TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS=:443 # sets the port for HTTPS
+
+      # Certificates configuration
+      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_DNSCHALLENGE=true
+      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_DNSCHALLENGE_PROVIDER=${DNS_CHALLENGE_PROVIDER}
+      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_DNSCHALLENGE_DELAYBEFORECHECK=0 # Sets the time to wait before checking the DNS c>
+      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_EMAIL=${ACME_EMAIL} # Email address used for registration
+      - TRAEFIK_CERTIFICATESRESOLVERS_MYRESOLVER_ACME_STORAGE=${ACME_STORAGE} # Stores the Let's Encrypt certificate in the docker volume
+
+      # Digital Ocean configuration
+      - DO_AUTH_TOKEN=${DOCKER_TOKEN} # Digital Ocean API Token
+    ports: # Expose ports 80 and 443
+      - "80:80"
+      - "443:443"
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./acme:/etc/traefik/acme # Copies the Let's Encrypt certificate locally for ease of backing up
+    labels:
+
+      # Traefik configuration
+      traefik.enable: true # enables Traefik for this container
+
+      # Routers configuration
+      # RedirectScheme http Router traefik
+      traefik.http.routers.traefik.rule: Host(`${TRAFIK_DOMAIN}`)
+      traefik.http.routers.traefik.entrypoints: web
+      traefik.http.routers.traefik.middlewares: test-redirectscheme # applies the test-redirectscheme middleware to the traefik route
+
+      # Https Router traefik-secure
+      traefik.http.routers.traefik-secure.rule: Host(`${TRAFIK_DOMAIN}`) # sets the rule for the Traefik dashboard route
+      traefik.http.routers.traefik-secure.entrypoints: websecure # sets the entrypoint for the Traefik dashboard route
+      traefik.http.routers.traefik-secure.tls: true # enables TLS for the Traefik dashboard route
+      traefik.http.routers.traefik-secure.tls.certresolver: myresolver # sets the certificate resolver for the Traefik dashboard route
+      traefik.http.routers.traefik-secure.service: api@internal
+      traefik.http.routers.traefik-secure.middlewares: auth # sets the middleware for the Traefik dashboard route
+
+      # Services
+      traefik.http.services.traefik-secure.loadbalancer.server.port: 8080 # sets the port for the Traefik dashboard route
+
+      # Middleware configuration (echo $(htpasswd -nb admin admin123))
+      traefik.http.middlewares.auth.basicauth.users: ${TRAEFIK_DASHBOARD_AUTHENTICATION} # sets the user and password for the basic authentication process
+      traefik.http.middlewares.auth.basicauth.realm: Restricted Area # sets the authentication realm for the basic authentication pr>
+
+      # Redirect Scheme HTTP -> HTTPS
+      traefik.http.middlewares.test-redirectscheme.redirectscheme.scheme: https # sets the scheme to redirect to (https)
+      traefik.http.middlewares.test-redirectscheme.redirectscheme.permanent: true # sets the redirection to permanent
+
+      # Watchtower configuration
+      com.centurylinklabs.watchtower.enable: "false" # disables Watchtower for this container
+
+  restapi:
+    image: ${DOCKER_USERNAME}/${DOCKER_REPOSITORY}:${DOCKER_TAG}
+    container_name: restapi
+    restart: unless-stopped
+    networks:
+      - frontend
+      - backend
+    environment:
+      PRODUCTION: ${PRODUCTION}
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
+      TOKEN_EXPIRATION_TIME: ${TOKEN_EXPIRATION_TIME}
+      TOKEN_ISSUER: ${TOKEN_ISSUER}
+      TOKEN_AUDIENCE: ${TOKEN_AUDIENCE}
+    labels:
+
+      # Traefik configuration
+      traefik.enable: true # enables Traefik for this container
+
+      # Routers configuration
+      # RedirectScheme http Router api
+      traefik.http.routers.restapi.rule: Host(`${REST_API_DOMAIN}`)
+      traefik.http.routers.restapi.entrypoints: web
+      traefik.http.routers.restapi.middlewares: restapi-redirectscheme # applies the api-redirectscheme middleware to the api route
+
+      # Https Router api-secure
+      traefik.http.routers.restapi-secure.rule: Host(`${REST_API_DOMAIN}`)
+      traefik.http.routers.restapi-secure.entrypoints: websecure
+      traefik.http.routers.restapi-secure.tls.certresolver: myresolver # see below
+      traefik.http.routers.restapi-secure.middlewares: restapi-compress, restapi-ratelimit # applies the api-compress and api-ratelimit middlewares to the api route
+
+      # Services configuration
+      traefik.http.services.restapi-secure.loadbalancer.server.port: 7070 # sets the port for the api service
+
+      # Compress Middleware
+      traefik.http.middlewares.restapi-compress.compress: true # enables gzip compression
+
+      # Rate Limit Middleware
+      traefik.http.middlewares.restapi-ratelimit.ratelimit.average: 100 # sets the average number of requests (seconds is the default unit)
+      traefik.http.middlewares.restapi-ratelimit.ratelimit.period: 1m # sets the period of time for the average number of requests. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h"
+      traefik.http.middlewares.restapi-ratelimit.ratelimit.burst: 50 # burst rate is the additional capacity it can handle for short, unexpected surges in requests.
+
+      # Redirect Scheme HTTP -> HTTPS
+      traefik.http.middlewares.restapi-redirectscheme.redirectscheme.scheme: https # sets the scheme to redirect to (https)
+      traefik.http.middlewares.restapi-redirectscheme.redirectscheme.permanent: true
+
+      # Watchtower configuration
+      com.centurylinklabs.watchtower.enable: "true" # enables Watchtower for this container
+
+  db:
+    image: postgres:15.3-alpine3.18
+    container_name: db
+    restart: unless-stopped
+    networks:
+      - backend
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    labels:
+      # Watchtower configuration
+      com.centurylinklabs.watchtower.enable: "false" # disables Watchtower for this container
+    volumes:
+      - ./data:/var/lib/postgresql/data/
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 1200 --cleanup --debug # checks for updates every 1200 seconds (20 min), cleans up old images, and outputs debug logs
+
+networks:
+  frontend:
+    name: frontend
+    driver: bridge
+  backend:
+    name: backend
+    driver: bridge

@@ -48,6 +48,4 @@ public class ApiProps {
             "(1008, 'Forest Hills Resort', 'Silkeborg', 'LUXURY', 'FIVE_STAR')," +
             "(1009, 'Blue Lagoon', 'Randers', 'ECONOMY', 'THREE_STAR');";
 
-
-
 }
