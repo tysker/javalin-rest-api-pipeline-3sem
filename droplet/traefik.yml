@@ -1,11 +1,44 @@
-# Define entrypoints
+# traefik.yml
+
+# Global configuration
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+# EntryPoints Configuration
 entryPoints:
   web:
     address: ":80"
   websecure:
     address: ":443"
 
-# Define routers
+# API and Dashboard Configuration
+api:
+  dashboard: true
+  insecure: false # Ensures the dashboard is not accessible over HTTP
+
+# Log Configuration
+log:
+  level: INFO
+
+# Providers Configuration
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    watch: true
+    exposedByDefault: false
+
+# Certificates Configuration
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: "${ACME_EMAIL}"
+      storage: "/etc/traefik/acme/acme.json"
+      dnsChallenge:
+        provider: "${DNS_CHALLENGE_PROVIDER}"
+        delayBeforeCheck: 0
+
+# HTTP Routers, Services, and Middlewares Configuration
 http:
   routers:
     # HTTP Router for Traefik Dashboard (Redirect HTTP to HTTPS)
@@ -47,15 +80,12 @@ http:
         - restapi-compress
         - restapi-ratelimit
 
-  # Define services
   services:
     restapi-service:
       loadBalancer:
         servers:
           - url: "http://restapi:7070"
 
-# Define middlewares
-http:
   middlewares:
     # Middleware for basic authentication
     auth:

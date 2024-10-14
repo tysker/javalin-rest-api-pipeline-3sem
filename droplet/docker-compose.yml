@@ -39,6 +39,24 @@ services:
     labels:
       traefik.enable: true
 
+  db:
+    image: postgres:15.3-alpine3.18
+    container_name: db
+    restart: unless-stopped
+    networks:
+      - backend
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+    labels:
+      # Watchtower configuration
+      com.centurylinklabs.watchtower.enable: "false" # disables Watchtower for this container
+    volumes:
+      - ./data:/var/lib/postgresql/data/
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
 networks:
   frontend:
     name: frontend
