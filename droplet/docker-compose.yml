@@ -13,7 +13,7 @@ services:
       - ./traefik.yml:/etc/traefik/traefik.yml
       - ./acme:/etc/traefik/acme # Optional: If using ACME certificates, keep this volume for certificate storage
     environment:
-      DO_AUTH_TOKEN: ${DOCKER_TOKEN}
+      DO_AUTH_TOKEN: ${DO_AUTH_TOKEN}
     labels:
       traefik.enable: true
 
