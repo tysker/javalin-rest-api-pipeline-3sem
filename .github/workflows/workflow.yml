@@ -1,9 +1,9 @@
-name: JAVALIN REST API TRAEFIK PIPELINE
+name: JAVALIN REST API TRAEFIK YML PIPELINE
 on:
   push:
-    branches: [ traefik-pipeline ]
+    branches: [ main ]
   pull_request:
-    branches: [ traefik-pipeline ]
+    branches: [ main ]
 jobs:
   build:
     runs-on: ubuntu-latest
