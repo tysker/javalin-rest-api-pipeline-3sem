@@ -3,16 +3,22 @@ CREATE ROLE joerg
     CREATEDB
     PASSWORD 'joerg1234!';
 
+SET ROLE joerg;
+
 CREATE DATABASE hotel;
 CREATE DATABASE company;
 
-GRANT ALL PRIVILEGES ON DATABASE company TO joerg;
+SET ROLE postgres;
+
+\connect hotel
+
+GRANT ALL PRIVILEGES ON SCHEMA public TO joerg;
+ALTER SCHEMA public OWNER TO joerg;
 
 \connect company
 
--- Grant usage and create privileges on schema public to joerg
-GRANT USAGE ON SCHEMA public TO joerg;
-GRANT CREATE ON SCHEMA public TO joerg;
+GRANT ALL PRIVILEGES ON SCHEMA public TO joerg;
+ALTER SCHEMA public OWNER TO joerg;
 
 SET ROLE joerg;
 

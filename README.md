@@ -35,16 +35,4 @@ We use Github Actions to build the project, run the tests and push the Docker im
 - Git
 - Postman (Optional)
 
-### For Mac users with M1 and M2 chips has to make some changes to the HibernateConfig file
 
-Do the following to get the Testcontainers up and running:
-
-1. Run the following commands in your terminal
-
-```bash 
-    # New tag (mac m1/m2): 
-    docker tag arm64v8/postgres:latest postgresql:15.3-alpine3.18
-    
-    # Symlink
-    sudo ln -s $HOME/.docker/run/docker.sock /var/run/docker.sock
-```

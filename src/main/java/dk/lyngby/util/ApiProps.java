@@ -6,8 +6,8 @@ public class ApiProps {
 
     // == HIBERNATE CONFIG FILE ==
     public static final String DB_NAME = "hotel";
-    public static final String DATABASE_USERNAME = "postgres";
-    public static final String DATABASE_PASSWORD = "postgres";
+    public static final String DATABASE_USERNAME = "joerg";
+    public static final String DATABASE_PASSWORD = "joerg1234!";
     public static final String DATABASE_URL = "jdbc:postgresql://localhost:5432/" + DB_NAME;
     public static final String DATABASE_DRIVER = "org.postgresql.Driver";
     public static final String DATABASE_DIALECT = "org.hibernate.dialect.PostgreSQLDialect";

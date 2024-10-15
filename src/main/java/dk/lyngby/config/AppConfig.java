@@ -47,12 +47,12 @@ public class AppConfig {
 
     // == exceptions ==
     private static void exceptionContext(Javalin app){
-        app.exception(ApiException.class, exctrl::apiExceptionHandler);
-        app.exception(ValidationException.class, exctrl::validationExceptionHandler);
-        app.exception(AuthorizationException.class, exctrl::exceptionHandlerNotAuthorized);
-        app.exception(TokenException.class, exctrl::tokenExceptionHandler);
-        app.exception(ConstraintViolationException.class, exctrl::constraintViolationExceptionHandler);
-        app.exception(Exception.class, exctrl::exceptionHandler);
+//        app.exception(ApiException.class, exctrl::apiExceptionHandler);
+//        app.exception(ValidationException.class, exctrl::validationExceptionHandler);
+//        app.exception(AuthorizationException.class, exctrl::exceptionHandlerNotAuthorized);
+//        app.exception(TokenException.class, exctrl::tokenExceptionHandler);
+//        app.exception(ConstraintViolationException.class, exctrl::constraintViolationExceptionHandler);
+//        app.exception(Exception.class, exctrl::exceptionHandler);
     }
 
     // == security ==
